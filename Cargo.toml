@@ -1,0 +1,14 @@
+[package]
+name = "rust-actix-test"
+version = "0.1.0"
+authors = ["frostsergei <37872140+frostsergei@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix = "0.10.0"
+actix-rt = "1.1.1"
+tokio = { version = "0.2.6", default-features = false, features = ["rt-core", "rt-util", "io-driver", "io-util", "tcp", "uds", "udp", "time", "signal", "sync"] }
+tokio-util = { version = "0.3", features = ["full"] }
+async-trait = "0.1.42"

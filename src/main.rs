@@ -137,7 +137,7 @@ impl Handler<Messages> for TActor{
     type Result = f64;
     
     fn handle(&mut self, _: Messages, _ctx: &mut Context<Self>) -> f64 {
-        self.temperature
+        1.0 / (self.temperature * 8.31)
     }
 }
 
@@ -185,7 +185,7 @@ async fn calc(p: Addr<PActor>, v: Addr<VActor>, t: Addr<TActor>) -> f64 {
     let vv = v.send(Messages::RequestV).await.unwrap();
     let tv = t.send(Messages::RequestT).await.unwrap();
 
-    (pv * vv) / (tv * 8.31)
+    pv * vv *tv
 }
 
 

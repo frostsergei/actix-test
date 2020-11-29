@@ -5,8 +5,7 @@ use actix::prelude::*;
 enum Messages {
     RequestP,
     RequestV,
-    RequestT,
-    RequestN,
+    RequestT
 }
 
 #[derive(Message)]
@@ -25,21 +24,22 @@ struct SetT(f64);
 #[rtype(result = "Result<f64, ()>")]
 struct ReadN;
 
-
 #[derive(Clone, Copy)]
 struct PActor{
     pressure: f64
 }
+
 #[derive(Clone, Copy)]
 struct VActor{
     volume: f64
 }
+
 #[derive(Clone, Copy)]
 struct TActor{
     temperature: f64
 }
+
 #[derive(Clone)]
-//#[derive(std::marker::Send)]
 struct NActor{
     nu: f64,
     pressure_actor: Box<Addr<PActor>>,
@@ -151,7 +151,6 @@ impl Handler<SetT> for TActor{
     }
 }
 
-//#[async_trait]
 impl Handler<ReadN> for NActor{
     type Result = ResponseActFuture<Self, Result<f64, ()>>;
     
@@ -176,7 +175,7 @@ impl Handler<ReadN> for NActor{
 impl Handler<Messages> for NActor{
     type Result = f64;
 
-    fn handle(&mut self, _: Messages, _: &mut Context<Self>) -> Self::Result {
+    fn handle(&mut self, _: Messages, _ctx: &mut Context<Self>) -> Self::Result {
         self.nu
     }
 }
@@ -189,6 +188,7 @@ async fn calc(p: Addr<PActor>, v: Addr<VActor>, t: Addr<TActor>) -> f64 {
     (pv * vv) / (tv * 8.31)
 }
 
+
 #[actix_rt::main]
 async fn main() {
 
@@ -197,22 +197,18 @@ async fn main() {
     let temperature_address =  Box::new(TActor{temperature:10.0}.start());
     
     let nact = Box::new(NActor {nu: 0.0, volume_actor: volume_address.clone(), pressure_actor: pressure_address.clone(), temperature_actor: temperature_address.clone()}.start()); 
-    let _ = nact.send(ReadN).await.unwrap();
-    let n = nact.send(Messages::RequestN).await.unwrap();
+    let n = nact.send(ReadN).await.unwrap().ok().unwrap();
     println!("{}",n);
 
     let _ = (*pressure_address).send(SetP(20.0)).await.unwrap();
-    let _ = nact.send(ReadN).await.unwrap();
-    let n = nact.send(Messages::RequestN).await.unwrap();
+    let n = nact.send(ReadN).await.unwrap().ok().unwrap();
     println!("{}",n);
 
     let _ = (*volume_address).send(SetV(20.0)).await.unwrap();
-    let _ = nact.send(ReadN).await.unwrap();
-    let n = nact.send(Messages::RequestN).await.unwrap();
+    let n = nact.send(ReadN).await.unwrap().ok().unwrap();
     println!("{}",n);
 
     let _ = (*temperature_address).send(SetT(5.0)).await.unwrap();
-    let _ = nact.send(ReadN).await.unwrap();
-    let n = nact.send(Messages::RequestN).await.unwrap();
+    let n = nact.send(ReadN).await.unwrap().ok().unwrap();
     println!("{}",n);
 }
